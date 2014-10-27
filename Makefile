@@ -13,8 +13,10 @@ CC = mpicc
 LD = @LD@
 
 RECORDER_LOG_FORMAT = $(srcdir)/./recorder-log-format.h
+INCL_DEPS = include/recorder.h include/recorder-dynamic.h $(recorder_LOG_FORMAT)
 
-CFLAGS_SHARED = -fPIC -I. -I$(srcdir) -I$(srcdir)/../ -I${MPI_DIR}/include -I${HDF5_DIR}/include \
+CFLAGS_SHARED = -fPIC -I. -I$(srcdir) -I$(srcdir)/../\
+				-I${MPI_DIR}/include -I${HDF5_DIR}/include \
 				-D_LARGEFILE64_SOURCE -shared -DRECORDER_PRELOAD
 
 LIBS += -lz @LIBBZ2@
@@ -26,16 +28,7 @@ all: lib/librecorder.so
 lib:
 	@mkdir -p $@
 
-lib/recorder-mpi-io.po: lib/recorder-mpi-io.c recorder.h recorder-dynamic.h $(recorder_LOG_FORMAT) | lib
-	$(CC) $(CFLAGS) -c $< -o $@
-
-lib/recorder-mpi-init-finalize.po: lib/recorder-mpi-init-finalize.c recorder.h recorder-dynamic.h $(recorder_LOG_FORMAT) | lib
-	$(CC) $(CFLAGS) -c $< -o $@
-
-lib/recorder-hdf5.po: lib/recorder-hdf5.c recorder.h $(recorder_LOG_FORMAT) | lib
-	$(CC) $(CFLAGS) -c $< -o $@
-
-lib/recorder-posix.po: lib/recorder-posix.c recorder.h $(recorder_LOG_FORMAT) | lib
+%.po: %.c $(INCL_DEPS) | lib
 	$(CC) $(CFLAGS) -c $< -o $@
 
 lib/librecorder.so: lib/recorder-mpi-io.po lib/recorder-mpi-init-finalize.po lib/recorder-hdf5.po lib/recorder-posix.po
