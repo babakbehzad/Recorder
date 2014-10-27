@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *	Copyright 2012 by The HDF Group												   *
+ *	Copyright 2012 by The HDF Group												                         *
  *	All rights reserved.                                                           *
  *                                                                                 *
  *	Redistribution and use in source and binary forms, with or without             *
@@ -40,6 +40,7 @@
  *	Prime Contract No. DE-AC02-05CH11231.                                          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -63,39 +64,35 @@
 typedef int64_t off64_t;
 #endif
 
-extern char* __progname_full;
+extern char *__progname_full;
 
 #ifdef RECORDER_PRELOAD
 #define __USE_GNU
 #include <dlfcn.h>
 #include <stdlib.h>
 
-#define RECORDER_FORWARD_DECL(name,ret,args) \
-  ret (*__real_ ## name)args = NULL;
+#define RECORDER_FORWARD_DECL(name, ret, args) ret(*__real_##name) args = NULL;
 
 #define RECORDER_DECL(__name) __name
 
-#define RECORDER_MPI_CALL(func) __real_ ## func
+#define RECORDER_MPI_CALL(func) __real_##func
 
-#define MAP_OR_FAIL(func) \
-    if (!(__real_ ## func)) \
-    { \
-        __real_ ## func = dlsym(RTLD_NEXT, #func); \
-        if(!(__real_ ## func)) { \
-           fprintf(stderr, "Darshan failed to map symbol: %s\n", #func); \
-           exit(1); \
-       } \
-    }
-
+#define MAP_OR_FAIL(func)                                                      \
+  if (!(__real_##func)) {                                                      \
+    __real_##func = dlsym(RTLD_NEXT, #func);                                   \
+    if (!(__real_##func)) {                                                    \
+      fprintf(stderr, "Darshan failed to map symbol: %s\n", #func);            \
+      exit(1);                                                                 \
+    }                                                                          \
+  }
 
 extern double (*__real_PMPI_Wtime)(void);
 
 #else
 
-#define RECORDER_FORWARD_DECL(name,ret,args) \
-  extern ret __real_ ## name args;
+#define RECORDER_FORWARD_DECL(name, ret, args) extern ret __real_##name args;
 
-#define RECORDER_DECL(__name) __wrap_ ## __name
+#define RECORDER_DECL(__name) __wrap_##__name
 
 #define MAP_OR_FAIL(func)
 
@@ -103,8 +100,8 @@ extern double (*__real_PMPI_Wtime)(void);
 
 #endif
 
-RECORDER_FORWARD_DECL(creat, int, (const char* path, mode_t mode));
-RECORDER_FORWARD_DECL(creat64, int, (const char* path, mode_t mode));
+RECORDER_FORWARD_DECL(creat, int, (const char *path, mode_t mode));
+RECORDER_FORWARD_DECL(creat64, int, (const char *path, mode_t mode));
 RECORDER_FORWARD_DECL(open, int, (const char *path, int flags, ...));
 RECORDER_FORWARD_DECL(open64, int, (const char *path, int flags, ...));
 RECORDER_FORWARD_DECL(close, int, (int fd));
@@ -112,918 +109,872 @@ RECORDER_FORWARD_DECL(write, ssize_t, (int fd, const void *buf, size_t count));
 RECORDER_FORWARD_DECL(read, ssize_t, (int fd, void *buf, size_t count));
 RECORDER_FORWARD_DECL(lseek, off_t, (int fd, off_t offset, int whence));
 RECORDER_FORWARD_DECL(lseek64, off64_t, (int fd, off64_t offset, int whence));
-RECORDER_FORWARD_DECL(pread, ssize_t, (int fd, void *buf, size_t count, off_t offset));
-RECORDER_FORWARD_DECL(pread64, ssize_t, (int fd, void *buf, size_t count, off64_t offset));
-RECORDER_FORWARD_DECL(pwrite, ssize_t, (int fd, const void *buf, size_t count, off_t offset));
-RECORDER_FORWARD_DECL(pwrite64, ssize_t, (int fd, const void *buf, size_t count, off64_t offset
-));
-RECORDER_FORWARD_DECL(readv, ssize_t, (int fd, const struct iovec *iov, int iovcnt));
-RECORDER_FORWARD_DECL(writev, ssize_t, (int fd, const struct iovec *iov, int iovcnt));
+RECORDER_FORWARD_DECL(pread, ssize_t,
+                      (int fd, void *buf, size_t count, off_t offset));
+RECORDER_FORWARD_DECL(pread64, ssize_t,
+                      (int fd, void *buf, size_t count, off64_t offset));
+RECORDER_FORWARD_DECL(pwrite, ssize_t,
+                      (int fd, const void *buf, size_t count, off_t offset));
+RECORDER_FORWARD_DECL(pwrite64, ssize_t,
+                      (int fd, const void *buf, size_t count, off64_t offset));
+RECORDER_FORWARD_DECL(readv, ssize_t,
+                      (int fd, const struct iovec *iov, int iovcnt));
+RECORDER_FORWARD_DECL(writev, ssize_t,
+                      (int fd, const struct iovec *iov, int iovcnt));
 RECORDER_FORWARD_DECL(__fxstat, int, (int vers, int fd, struct stat *buf));
 RECORDER_FORWARD_DECL(__fxstat64, int, (int vers, int fd, struct stat64 *buf));
-RECORDER_FORWARD_DECL(__lxstat, int, (int vers, const char* path, struct stat *buf));
-RECORDER_FORWARD_DECL(__lxstat64, int, (int vers, const char* path, struct stat64 *buf));
-RECORDER_FORWARD_DECL(__xstat, int, (int vers, const char* path, struct stat *buf));
-RECORDER_FORWARD_DECL(__xstat64, int, (int vers, const char* path, struct stat64 *buf));
-RECORDER_FORWARD_DECL(mmap, void*, (void *addr, size_t length, int prot, int flags, int fd, off_t offset));
-RECORDER_FORWARD_DECL(mmap64, void*, (void *addr, size_t length, int prot, int flags, int fd, off64_t offset));
-RECORDER_FORWARD_DECL(fopen, FILE*, (const char *path, const char *mode));
-RECORDER_FORWARD_DECL(fopen64, FILE*, (const char *path, const char *mode));
-RECORDER_FORWARD_DECL(fclose, int, (FILE *fp));
-RECORDER_FORWARD_DECL(fread, size_t, (void *ptr, size_t size, size_t nmemb, FILE *stream));
-RECORDER_FORWARD_DECL(fwrite, size_t, (const void *ptr, size_t size, size_t nmemb, FILE *stream));
-RECORDER_FORWARD_DECL(fseek, int, (FILE *stream, long offset, int whence));
+RECORDER_FORWARD_DECL(__lxstat, int,
+                      (int vers, const char *path, struct stat *buf));
+RECORDER_FORWARD_DECL(__lxstat64, int,
+                      (int vers, const char *path, struct stat64 *buf));
+RECORDER_FORWARD_DECL(__xstat, int,
+                      (int vers, const char *path, struct stat *buf));
+RECORDER_FORWARD_DECL(__xstat64, int,
+                      (int vers, const char *path, struct stat64 *buf));
+RECORDER_FORWARD_DECL(mmap, void *, (void *addr, size_t length, int prot,
+                                     int flags, int fd, off_t offset));
+RECORDER_FORWARD_DECL(mmap64, void *, (void *addr, size_t length, int prot,
+                                       int flags, int fd, off64_t offset));
+RECORDER_FORWARD_DECL(fopen, FILE *, (const char *path, const char *mode));
+RECORDER_FORWARD_DECL(fopen64, FILE *, (const char *path, const char *mode));
+RECORDER_FORWARD_DECL(fclose, int, (FILE * fp));
+RECORDER_FORWARD_DECL(fread, size_t,
+                      (void *ptr, size_t size, size_t nmemb, FILE *stream));
+RECORDER_FORWARD_DECL(fwrite, size_t, (const void *ptr, size_t size,
+                                       size_t nmemb, FILE *stream));
+RECORDER_FORWARD_DECL(fseek, int, (FILE * stream, long offset, int whence));
 RECORDER_FORWARD_DECL(fsync, int, (int fd));
 RECORDER_FORWARD_DECL(fdatasync, int, (int fd));
 
 static int recorder_mem_alignment = 1;
 
 /* these are paths that we will not trace */
-static char* exclusions[] = {
-"/etc/",
-"/dev/",
-"/usr/",
-"/bin/",
-"/boot/",
-"/lib/",
-"/opt/",
-"/sbin/",
-"/sys/",
-"/proc/",
-NULL
-};
+static char *exclusions[] = {"/etc/",  "/dev/",  "/usr/", "/bin/",
+                             "/boot/", "/lib/",  "/opt/", "/sbin/",
+                             "/sys/",  "/proc/", NULL};
 
 static double posix_wtime(void);
 
 char *fd2name(int fd) {
-    size_t len = 256;
-    struct stat sb;
-    char fdname[len];
-    sprintf(fdname, "/proc/self/fd/%d", fd);
-    if (lstat(fdname, &sb) == -1) {
-        return "null";
-    }
+  size_t len = 256;
+  struct stat sb;
+  char fdname[len];
+  sprintf(fdname, "/proc/self/fd/%d", fd);
+  if (lstat(fdname, &sb) == -1) {
+    return "null";
+  }
 
-    char *linkname = malloc(sb.st_size+1);
-    int r = readlink(fdname, linkname, sb.st_size+1);
-    linkname[r] = '\x00';
-    return linkname;
+  char *linkname = malloc(sb.st_size + 1);
+  int r = readlink(fdname, linkname, sb.st_size + 1);
+  linkname[r] = '\x00';
+  return linkname;
 }
 
-int RECORDER_DECL(close)(int fd)
-{
-    struct recorder_file_runtime* file;
-    int hash_index;
-    int tmp_fd = fd;
-    double tm1, tm2;
-    int ret;
+int RECORDER_DECL(close)(int fd) {
+  struct recorder_file_runtime *file;
+  int hash_index;
+  int tmp_fd = fd;
+  double tm1, tm2;
+  int ret;
 
-    MAP_OR_FAIL(close);
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    char* actual_filename = fd2name(fd);
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f close (%s)", tm1, actual_filename);
-    #endif
+  MAP_OR_FAIL(close);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  char *actual_filename = fd2name(fd);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f close (%s)", tm1, actual_filename);
+#endif
 
-    ret = __real_close(fd);
+  ret = __real_close(fd);
 
-   #ifndef DISABLE_POSIX_TRACE
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
+}
+
+int RECORDER_DECL(fclose)(FILE *fp) {
+  struct recorder_file_runtime *file;
+  int hash_index;
+  int tmp_fd = fileno(fp);
+  double tm1, tm2;
+  int ret;
+
+  MAP_OR_FAIL(fclose);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fclose (fp=%p ) ", tm1, fp);
+#endif
+
+  ret = __real_fclose(fp);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
+}
+
+int RECORDER_DECL(fsync)(int fd) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
+
+  MAP_OR_FAIL(fsync);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  char *actual_filename = fd2name(fd);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fsync (%s)", tm1, actual_filename);
+
+#endif
+
+  ret = __real_fsync(fd);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  if (ret < 0)
+    return (ret);
+
+  return (ret);
+}
+
+int RECORDER_DECL(fdatasync)(int fd) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
+
+  MAP_OR_FAIL(fdatasync);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  char *actual_filename = fd2name(fd);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fdatasync (%s)", tm1, actual_filename);
+#endif
+
+  ret = __real_fdatasync(fd);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
+}
+
+void *RECORDER_DECL(mmap64)(void *addr, size_t length, int prot, int flags,
+                            int fd, off64_t offset) {
+  void *ret;
+  struct recorder_file_runtime *file;
+
+  MAP_OR_FAIL(mmap64);
+
+  ret = __real_mmap64(addr, length, prot, flags, fd, offset);
+  if (ret == MAP_FAILED)
+    return (ret);
+
+  return (ret);
+}
+
+void *RECORDER_DECL(mmap)(void *addr, size_t length, int prot, int flags,
+                          int fd, off_t offset) {
+  void *ret;
+  struct recorder_file_runtime *file;
+
+  MAP_OR_FAIL(mmap);
+
+  ret = __real_mmap(addr, length, prot, flags, fd, offset);
+  if (ret == MAP_FAILED)
+    return (ret);
+
+  return (ret);
+}
+
+int RECORDER_DECL(creat)(const char *path, mode_t mode) {
+  int ret;
+  double tm1, tm2;
+
+  MAP_OR_FAIL(creat);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f creat (%s, %d)", tm1, path, mode);
+#endif
+
+  ret = __real_creat(path, mode);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
+}
+
+int RECORDER_DECL(creat64)(const char *path, mode_t mode) {
+  int ret;
+  double tm1, tm2;
+
+  MAP_OR_FAIL(creat64);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f creat64 (%s, %d)", tm1, path, mode);
+#endif
+
+  ret = __real_creat64(path, mode);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
+}
+
+int RECORDER_DECL(open64)(const char *path, int flags, ...) {
+  int mode = 0;
+  int ret;
+  double tm1, tm2;
+
+  MAP_OR_FAIL(open64);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f open64 (%s, %d, %d)", tm1, path, flags);
+#endif
+
+  if (flags & O_CREAT) {
+    va_list arg;
+    va_start(arg, flags);
+    mode = va_arg(arg, int);
+    va_end(arg);
+
+    ret = __real_open64(path, flags, mode);
+
+#ifndef DISABLE_POSIX_TRACE
     tm2 = recorder_wtime();
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+    if (__recorderfh != NULL)
+      fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+  } else {
+    ret = __real_open64(path, flags);
 
-    return(ret);
-}
-
-int RECORDER_DECL(fclose)(FILE *fp)
-{
-    struct recorder_file_runtime* file;
-    int hash_index;
-    int tmp_fd = fileno(fp);
-    double tm1, tm2;
-    int ret;
-
-    MAP_OR_FAIL(fclose);
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fclose (fp=%p ) ", tm1, fp);
-    #endif
-
-    ret = __real_fclose(fp);
-
-   #ifndef DISABLE_POSIX_TRACE
+#ifndef DISABLE_POSIX_TRACE
     tm2 = recorder_wtime();
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+    if (__recorderfh != NULL)
+      fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+  }
 
-    return(ret);
+  return (ret);
 }
 
+int RECORDER_DECL(open)(const char *path, int flags, ...) {
+  int mode = 0;
+  int ret;
+  double tm1, tm2;
 
-int RECORDER_DECL(fsync)(int fd)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+  MAP_OR_FAIL(open);
 
-    MAP_OR_FAIL(fsync);
-    #ifndef DISABLE_POSIX_TRACE
+  if (flags & O_CREAT) {
+    va_list arg;
+    va_start(arg, flags);
+    mode = va_arg(arg, int);
+    va_end(arg);
+
+#ifndef DISABLE_POSIX_TRACE
     tm1 = recorder_wtime();
-    char *actual_filename = fd2name(fd);
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fsync (%s)", tm1, actual_filename);
+    if (__recorderfh != NULL)
+      fprintf(__recorderfh, "%.5f open (%s, %d, %d)", tm1, path, flags, mode);
+#endif
 
-    #endif
+    ret = __real_open(path, flags, mode);
 
-    ret = __real_fsync(fd);
-
-   #ifndef DISABLE_POSIX_TRACE
+#ifndef DISABLE_POSIX_TRACE
     tm2 = recorder_wtime();
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-
-    if(ret < 0)
-        return(ret);
-
-    return(ret);
-}
-
-int RECORDER_DECL(fdatasync)(int fd)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
-
-    MAP_OR_FAIL(fdatasync);
-    #ifndef DISABLE_POSIX_TRACE
+    if (__recorderfh != NULL)
+      fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+  } else {
+#ifndef DISABLE_POSIX_TRACE
     tm1 = recorder_wtime();
-    char *actual_filename = fd2name(fd);
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fdatasync (%s)", tm1, actual_filename);
-    #endif
+    if (__recorderfh != NULL)
+      fprintf(__recorderfh, "%.5f open (%s, %d)", tm1, path, flags);
+#endif
 
-    ret = __real_fdatasync(fd);
+    ret = __real_open(path, flags);
 
-    #ifndef DISABLE_POSIX_TRACE
+#ifndef DISABLE_POSIX_TRACE
     tm2 = recorder_wtime();
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+    if (__recorderfh != NULL)
+      fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+  }
 
-    return(ret);
+  return (ret);
 }
 
+FILE *RECORDER_DECL(fopen64)(const char *path, const char *mode) {
+  FILE *ret;
+  int fd;
+  double tm1, tm2;
 
-void* RECORDER_DECL(mmap64)(void *addr, size_t length, int prot, int flags,
-    int fd, off64_t offset)
-{
-    void* ret;
-    struct recorder_file_runtime* file;
+  MAP_OR_FAIL(fopen64);
 
-    MAP_OR_FAIL(mmap64);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fopen64 (%s)", tm1, path);
 
-    ret = __real_mmap64(addr, length, prot, flags, fd, offset);
-    if(ret == MAP_FAILED)
-        return(ret);
+#endif
 
-    return(ret);
+  ret = __real_fopen64(path, mode);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  if (ret == 0)
+    fd = -1;
+  else
+    fd = fileno(ret);
+
+  return (ret);
 }
 
+FILE *RECORDER_DECL(fopen)(const char *path, const char *mode) {
+  FILE *ret;
+  int fd;
+  double tm1, tm2;
 
-void* RECORDER_DECL(mmap)(void *addr, size_t length, int prot, int flags,
-    int fd, off_t offset)
-{
-    void* ret;
-    struct recorder_file_runtime* file;
+  MAP_OR_FAIL(fopen);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fopen (%s)", tm1, path);
 
-    MAP_OR_FAIL(mmap);
+#endif
 
-    ret = __real_mmap(addr, length, prot, flags, fd, offset);
-    if(ret == MAP_FAILED)
-        return(ret);
+  ret = __real_fopen(path, mode);
 
-    return(ret);
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  if (ret == 0)
+    fd = -1;
+  else
+    fd = fileno(ret);
+
+  return (ret);
 }
 
-int RECORDER_DECL(creat)(const char* path, mode_t mode)
-{
-    int ret;
-    double tm1, tm2;
+int RECORDER_DECL(__xstat64)(int vers, const char *path, struct stat64 *buf) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(creat);
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
+  MAP_OR_FAIL(__xstat64);
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f creat (%s, %d)", tm1, path, mode);
-    #endif
+  tm1 = recorder_wtime();
+  ret = __real___xstat64(vers, path, buf);
+  tm2 = recorder_wtime();
+  if (ret < 0 || !S_ISREG(buf->st_mode))
+    return (ret);
 
-    ret = __real_creat(path, mode);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
+  return (ret);
 }
 
-int RECORDER_DECL(creat64)(const char* path, mode_t mode)
-{
-    int ret;
-    double tm1, tm2;
+int RECORDER_DECL(__lxstat64)(int vers, const char *path, struct stat64 *buf) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(creat64);
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
+  MAP_OR_FAIL(__lxstat64);
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f creat64 (%s, %d)", tm1, path, mode);
-    #endif
+  tm1 = recorder_wtime();
+  ret = __real___lxstat64(vers, path, buf);
+  tm2 = recorder_wtime();
+  if (ret < 0 || !S_ISREG(buf->st_mode))
+    return (ret);
 
-    ret = __real_creat64(path, mode);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
+  return (ret);
 }
 
-int RECORDER_DECL(open64)(const char* path, int flags, ...)
-{
-    int mode = 0;
-    int ret;
-    double tm1, tm2;
+int RECORDER_DECL(__fxstat64)(int vers, int fd, struct stat64 *buf) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(open64);
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
+  MAP_OR_FAIL(__fxstat64);
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f open64 (%s, %d, %d)", tm1, path, flags);
-    #endif
+  tm1 = recorder_wtime();
+  ret = __real___fxstat64(vers, fd, buf);
+  tm2 = recorder_wtime();
+  if (ret < 0 || !S_ISREG(buf->st_mode))
+    return (ret);
 
-    if (flags & O_CREAT)
-    {
-        va_list arg;
-        va_start(arg, flags);
-        mode = va_arg(arg, int);
-        va_end(arg);
-
-        ret = __real_open64(path, flags, mode);
-
-        #ifndef DISABLE_POSIX_TRACE
-        tm2 = recorder_wtime();
-
-        if(__recorderfh != NULL)
-            fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-        #endif
-    }
-    else
-    {
-        ret = __real_open64(path, flags);
-
-        #ifndef DISABLE_POSIX_TRACE
-        tm2 = recorder_wtime();
-
-        if(__recorderfh != NULL)
-            fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-        #endif
-    }
-
-    return(ret);
+  return (ret);
 }
 
-int RECORDER_DECL(open)(const char *path, int flags, ...)
-{
-    int mode = 0;
-    int ret;
-    double tm1, tm2;
+int RECORDER_DECL(__xstat)(int vers, const char *path, struct stat *buf) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(open);
+  MAP_OR_FAIL(__xstat);
 
-    if (flags & O_CREAT)
-    {
-        va_list arg;
-        va_start(arg, flags);
-        mode = va_arg(arg, int);
-        va_end(arg);
+  tm1 = recorder_wtime();
+  ret = __real___xstat(vers, path, buf);
+  tm2 = recorder_wtime();
+  if (ret < 0 || !S_ISREG(buf->st_mode))
+    return (ret);
 
-        #ifndef DISABLE_POSIX_TRACE
-        tm1 = recorder_wtime();
-        if(__recorderfh != NULL)
-            fprintf(__recorderfh,"%.5f open (%s, %d, %d)", tm1, path, flags, mode);
-        #endif
-
-        ret = __real_open(path, flags, mode);
-
-        #ifndef DISABLE_POSIX_TRACE
-        tm2 = recorder_wtime();
-
-        if(__recorderfh != NULL)
-            fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-        #endif
-    }
-    else
-    {
-        #ifndef DISABLE_POSIX_TRACE
-        tm1 = recorder_wtime();
-        if(__recorderfh != NULL)
-            fprintf(__recorderfh,"%.5f open (%s, %d)", tm1, path, flags);
-        #endif
-
-        ret = __real_open(path, flags);
-
-        #ifndef DISABLE_POSIX_TRACE
-        tm2 = recorder_wtime();
-
-        if(__recorderfh != NULL)
-            fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-        #endif
-    }
-
-    return(ret);
+  return (ret);
 }
 
-FILE* RECORDER_DECL(fopen64)(const char *path, const char *mode)
-{
-    FILE* ret;
-    int fd;
-    double tm1, tm2;
+int RECORDER_DECL(__lxstat)(int vers, const char *path, struct stat *buf) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(fopen64);
+  MAP_OR_FAIL(__lxstat);
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fopen64 (%s)", tm1, path);
+  tm1 = recorder_wtime();
+  ret = __real___lxstat(vers, path, buf);
+  tm2 = recorder_wtime();
+  if (ret < 0 || !S_ISREG(buf->st_mode))
+    return (ret);
 
-    #endif
-
-    ret = __real_fopen64(path, mode);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    if(ret == 0)
-        fd = -1;
-    else
-        fd = fileno(ret);
-
-    return(ret);
+  return (ret);
 }
 
-FILE* RECORDER_DECL(fopen)(const char *path, const char *mode)
-{
-    FILE* ret;
-    int fd;
-    double tm1, tm2;
+int RECORDER_DECL(__fxstat)(int vers, int fd, struct stat *buf) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(fopen);
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fopen (%s)", tm1, path);
+  MAP_OR_FAIL(__fxstat);
 
-    #endif
+  tm1 = recorder_wtime();
+  ret = __real___fxstat(vers, fd, buf);
+  tm2 = recorder_wtime();
+  if (ret < 0 || !S_ISREG(buf->st_mode))
+    return (ret);
 
-    ret = __real_fopen(path, mode);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    if(ret == 0)
-        fd = -1;
-    else
-        fd = fileno(ret);
-
-    return(ret);
+  return (ret);
 }
 
-int RECORDER_DECL(__xstat64)(int vers, const char *path, struct stat64 *buf)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+ssize_t RECORDER_DECL(pread64)(int fd, void *buf, size_t count,
+                               off64_t offset) {
+  ssize_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(__xstat64);
+  MAP_OR_FAIL(pread64);
+#ifndef DISABLE_POSIX_TRACE
+  if ((unsigned long)buf % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    tm1 = recorder_wtime();
-    ret = __real___xstat64(vers, path, buf);
-    tm2 = recorder_wtime();
-    if(ret < 0 || !S_ISREG(buf->st_mode))
-        return(ret);
+  tm1 = recorder_wtime();
 
-    return(ret);
+  char *actual_file = fd2name(fd);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f pread64 (%s, buf=%p, %d, %d)", tm1, actual_file,
+            buf, count, offset);
+#endif
+
+  ret = __real_pread64(fd, buf, count, offset);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-int RECORDER_DECL(__lxstat64)(int vers, const char *path, struct stat64 *buf)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+ssize_t RECORDER_DECL(pread)(int fd, void *buf, size_t count, off_t offset) {
+  ssize_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(__lxstat64);
+  MAP_OR_FAIL(pread);
+  if ((unsigned long)buf % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    tm1 = recorder_wtime();
-    ret = __real___lxstat64(vers, path, buf);
-    tm2 = recorder_wtime();
-    if(ret < 0 || !S_ISREG(buf->st_mode))
-        return(ret);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  char *actual_file = fd2name(fd);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f pread(%d, buf=%p, %d, %d)", tm1, actual_file,
+            buf, count, offset);
+#endif
 
-    return(ret);
+  ret = __real_pread(fd, buf, count, offset);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-int RECORDER_DECL(__fxstat64)(int vers, int fd, struct stat64 *buf)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+ssize_t RECORDER_DECL(pwrite)(int fd, const void *buf, size_t count,
+                              off_t offset) {
+  ssize_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(__fxstat64);
+  MAP_OR_FAIL(pwrite);
+  if ((unsigned long)buf % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    tm1 = recorder_wtime();
-    ret = __real___fxstat64(vers, fd, buf);
-    tm2 = recorder_wtime();
-    if(ret < 0 || !S_ISREG(buf->st_mode))
-        return(ret);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  char *actual_file = fd2name(fd);
 
-    return(ret);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f pwrite (%s, buf=%p, %d, %d)", tm1, actual_file,
+            buf, count, offset);
+#endif
+
+  ret = __real_pwrite(fd, buf, count, offset);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
+ssize_t RECORDER_DECL(pwrite64)(int fd, const void *buf, size_t count,
+                                off64_t offset) {
+  ssize_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-int RECORDER_DECL(__xstat)(int vers, const char *path, struct stat *buf)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+  MAP_OR_FAIL(pwrite64);
 
-    MAP_OR_FAIL(__xstat);
+  if ((unsigned long)buf % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    tm1 = recorder_wtime();
-    ret = __real___xstat(vers, path, buf);
-    tm2 = recorder_wtime();
-    if(ret < 0 || !S_ISREG(buf->st_mode))
-        return(ret);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f pwrite64 (%d, const void *buf, %d, %d)", tm1,
+            fd, count, offset);
+#endif
 
-    return(ret);
+  ret = __real_pwrite64(fd, buf, count, offset);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-int RECORDER_DECL(__lxstat)(int vers, const char *path, struct stat *buf)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+ssize_t RECORDER_DECL(readv)(int fd, const struct iovec *iov, int iovcnt) {
+  ssize_t ret;
+  int aligned_flag = 1;
+  int i;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(__lxstat);
+  MAP_OR_FAIL(readv);
 
-    tm1 = recorder_wtime();
-    ret = __real___lxstat(vers, path, buf);
-    tm2 = recorder_wtime();
-    if(ret < 0 || !S_ISREG(buf->st_mode))
-        return(ret);
+  for (i = 0; i < iovcnt; i++) {
+    if (((unsigned long)iov[i].iov_base % recorder_mem_alignment) != 0)
+      aligned_flag = 0;
+  }
 
-    return(ret);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f readv (%d, iov, %d)", tm1, fd, iovcnt);
+#endif
+
+  ret = __real_readv(fd, iov, iovcnt);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-int RECORDER_DECL(__fxstat)(int vers, int fd, struct stat *buf)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
+ssize_t RECORDER_DECL(writev)(int fd, const struct iovec *iov, int iovcnt) {
+  ssize_t ret;
+  int aligned_flag = 1;
+  int i;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(__fxstat);
+  MAP_OR_FAIL(writev);
 
-    tm1 = recorder_wtime();
-    ret = __real___fxstat(vers, fd, buf);
-    tm2 = recorder_wtime();
-    if(ret < 0 || !S_ISREG(buf->st_mode))
-        return(ret);
+  for (i = 0; i < iovcnt; i++) {
+    if (!((unsigned long)iov[i].iov_base % recorder_mem_alignment == 0))
+      aligned_flag = 0;
+  }
 
-    return(ret);
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f writev (%d, const iov, %d)", tm1, fd, iovcnt);
+#endif
+
+  ret = __real_writev(fd, iov, iovcnt);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-ssize_t RECORDER_DECL(pread64)(int fd, void *buf, size_t count, off64_t offset)
-{
-    ssize_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
+size_t RECORDER_DECL(fread)(void *ptr, size_t size, size_t nmemb,
+                            FILE *stream) {
+  size_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(pread64);
-    #ifndef DISABLE_POSIX_TRACE
-    if((unsigned long)buf % recorder_mem_alignment == 0)
-        aligned_flag = 1;
+  MAP_OR_FAIL(fread);
 
-    tm1 = recorder_wtime();
+  if ((unsigned long)ptr % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    char *actual_file = fd2name(fd);
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f pread64 (%s, buf=%p, %d, %d)",tm1, actual_file, buf, count, offset);
-    #endif
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fread (ptr, %d, %d, %d)", tm1, size, nmemb,
+            fileno(stream));
 
-    ret = __real_pread64(fd, buf, count, offset);
+#endif
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
+  ret = __real_fread(ptr, size, nmemb, stream);
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
 
-    return(ret);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-ssize_t RECORDER_DECL(pread)(int fd, void *buf, size_t count, off_t offset)
-{
-    ssize_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
+ssize_t RECORDER_DECL(read)(int fd, void *buf, size_t count) {
+  ssize_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(pread);
-    if((unsigned long)buf % recorder_mem_alignment == 0)
-        aligned_flag = 1;
+  MAP_OR_FAIL(read);
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    char *actual_file = fd2name(fd);
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f pread(%d, buf=%p, %d, %d)",tm1, actual_file, buf, count, offset);
-    #endif
+  if ((unsigned long)buf % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    ret = __real_pread(fd, buf, count, offset);
+  tm1 = recorder_wtime();
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
+#ifndef DISABLE_POSIX_TRACE
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f read (%d, buf, %d)", tm1, fd, count);
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+#endif
 
-    return(ret);
+  ret = __real_read(fd, buf, count);
+
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
+
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
+ssize_t RECORDER_DECL(write)(int fd, const void *buf, size_t count) {
+  ssize_t ret;
 
-ssize_t RECORDER_DECL(pwrite)(int fd, const void *buf, size_t count, off_t offset)
-{
-    ssize_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(pwrite);
-    if((unsigned long)buf % recorder_mem_alignment == 0)
-        aligned_flag = 1;
+  MAP_OR_FAIL(write);
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    char *actual_file = fd2name(fd);
+  if ((unsigned long)buf % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f pwrite (%s, buf=%p, %d, %d)",tm1, actual_file, buf, count, offset);
-    #endif
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  char *actual_filename = fd2name(fd);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f write (%s, buf=%p, %d)", tm1, actual_filename,
+            buf, count);
+#endif
 
-    ret = __real_pwrite(fd, buf, count, offset);
+  ret = __real_write(fd, buf, count);
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
 
-    return(ret);
+  return (ret);
 }
 
-ssize_t RECORDER_DECL(pwrite64)(int fd, const void *buf, size_t count, off64_t offset)
-{
-    ssize_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
+size_t RECORDER_DECL(fwrite)(const void *ptr, size_t size, size_t nmemb,
+                             FILE *stream) {
+  size_t ret;
+  int aligned_flag = 0;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(pwrite64);
+  MAP_OR_FAIL(fwrite);
 
-    if((unsigned long)buf % recorder_mem_alignment == 0)
-        aligned_flag = 1;
+  if ((unsigned long)ptr % recorder_mem_alignment == 0)
+    aligned_flag = 1;
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f pwrite64 (%d, const void *buf, %d, %d)", tm1, fd, count, offset);
-    #endif
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
 
-    ret = __real_pwrite64(fd, buf, count, offset);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fwrite (ptr, %d, %d, %d)", tm1, size, nmemb,
+            fileno(stream));
+#endif
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
+  ret = __real_fwrite(ptr, size, nmemb, stream);
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
 
-    return(ret);
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
+
+  return (ret);
 }
 
-ssize_t RECORDER_DECL(readv)(int fd, const struct iovec *iov, int iovcnt)
-{
-    ssize_t ret;
-    int aligned_flag = 1;
-    int i;
-    double tm1, tm2;
+off64_t RECORDER_DECL(lseek64)(int fd, off64_t offset, int whence) {
+  off64_t ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(readv);
+  MAP_OR_FAIL(lseek64);
 
-    for(i=0; i<iovcnt; i++)
-    {
-        if(((unsigned long)iov[i].iov_base % recorder_mem_alignment) != 0)
-            aligned_flag = 0;
-    }
+  tm1 = recorder_wtime();
+  ret = __real_lseek64(fd, offset, whence);
+  tm2 = recorder_wtime();
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f readv (%d, iov, %d)",tm1, fd, iovcnt);
-    #endif
-
-    ret = __real_readv(fd, iov, iovcnt);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
+  return (ret);
 }
 
-ssize_t RECORDER_DECL(writev)(int fd, const struct iovec *iov, int iovcnt)
-{
-    ssize_t ret;
-    int aligned_flag = 1;
-    int i;
-    double tm1, tm2;
+off_t RECORDER_DECL(lseek)(int fd, off_t offset, int whence) {
+  off_t ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(writev);
+  MAP_OR_FAIL(lseek);
 
-    for(i=0; i<iovcnt; i++)
-    {
-        if(!((unsigned long)iov[i].iov_base % recorder_mem_alignment == 0))
-            aligned_flag = 0;
-    }
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f lseek (fd, offset, whence)", tm1);
+#endif
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f writev (%d, const iov, %d)", tm1, fd, iovcnt);
-    #endif
+  ret = __real_lseek(fd, offset, whence);
 
-    ret = __real_writev(fd, iov, iovcnt);
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
+  return (ret);
 }
 
-size_t RECORDER_DECL(fread)(void *ptr, size_t size, size_t nmemb, FILE *stream)
-{
-    size_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
+int RECORDER_DECL(fseek)(FILE *stream, long offset, int whence) {
+  int ret;
+  struct recorder_file_runtime *file;
+  double tm1, tm2;
 
-    MAP_OR_FAIL(fread);
+  MAP_OR_FAIL(fseek);
 
-    if((unsigned long)ptr % recorder_mem_alignment == 0)
-        aligned_flag = 1;
+#ifndef DISABLE_POSIX_TRACE
+  tm1 = recorder_wtime();
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fread (ptr, %d, %d, %d)",tm1, size, nmemb, fileno(stream));
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, "%.5f fseek (stream=%p, offset=%d, whence=%d)", tm1,
+            stream, offset, whence);
+#endif
 
-    #endif
+  ret = __real_fseek(stream, offset, whence);
 
-    ret = __real_fread(ptr, size, nmemb, stream);
+#ifndef DISABLE_POSIX_TRACE
+  tm2 = recorder_wtime();
 
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
+  if (__recorderfh != NULL)
+    fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
+#endif
 
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
+  return (ret);
 }
 
-ssize_t RECORDER_DECL(read)(int fd, void *buf, size_t count)
-{
-    ssize_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
+static double posix_wtime(void) { return RECORDER_MPI_CALL(PMPI_Wtime)(); }
 
-    MAP_OR_FAIL(read);
-
-    if((unsigned long)buf % recorder_mem_alignment == 0)
-        aligned_flag = 1;
-
-    tm1 = recorder_wtime();
-
-    #ifndef DISABLE_POSIX_TRACE
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f read (%d, buf, %d)", tm1, fd, count);
-
-    #endif
-
-    ret = __real_read(fd, buf, count);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
-}
-
-ssize_t RECORDER_DECL(write)(int fd, const void *buf, size_t count)
-{
-    ssize_t ret;
-
-    int aligned_flag = 0;
-    double tm1, tm2;
-
-    MAP_OR_FAIL(write);
-
-    if((unsigned long)buf % recorder_mem_alignment == 0)
-        aligned_flag = 1;
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-    char* actual_filename = fd2name(fd);
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f write (%s, buf=%p, %d)", tm1, actual_filename, buf, count);
-    #endif
-
-    ret = __real_write(fd, buf, count);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
-}
-
-size_t RECORDER_DECL(fwrite)(const void *ptr, size_t size, size_t nmemb, FILE *stream)
-{
-    size_t ret;
-    int aligned_flag = 0;
-    double tm1, tm2;
-
-    MAP_OR_FAIL(fwrite);
-
-    if((unsigned long)ptr % recorder_mem_alignment == 0)
-        aligned_flag = 1;
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fwrite (ptr, %d, %d, %d)",tm1, size, nmemb, fileno(stream));
-    #endif
-
-    ret = __real_fwrite(ptr, size, nmemb, stream);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
-}
-
-off64_t RECORDER_DECL(lseek64)(int fd, off64_t offset, int whence)
-{
-    off64_t ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
-
-    MAP_OR_FAIL(lseek64);
-
-    #ifndef DISABLE_POSIX_TRACE
-    char *actual_filename = fd2name(fd);
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f lseek (%s, %ld, %d)", tm1, actual_filename, offset, whence);
-    #endif
-
-    ret = __real_lseek64(fd, offset, whence);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
-}
-
-off_t RECORDER_DECL(lseek)(int fd, off_t offset, int whence)
-{
-    off_t ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
-
-    MAP_OR_FAIL(lseek);
-
-    #ifndef DISABLE_POSIX_TRACE
-    char *actual_filename = fd2name(fd);
-    tm1 = recorder_wtime();
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f lseek (%s, %d, %d)", tm1, actual_filename, offset, whence);
-    #endif
-
-    ret = __real_lseek(fd, offset, whence);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
-}
-
-int RECORDER_DECL(fseek)(FILE *stream, long offset, int whence)
-{
-    int ret;
-    struct recorder_file_runtime* file;
-    double tm1, tm2;
-
-    MAP_OR_FAIL(fseek);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm1 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh,"%.5f fseek (stream=%p, offset=%d, whence=%d)", tm1, stream, offset, whence);
-    #endif
-
-    ret = __real_fseek(stream, offset, whence);
-
-    #ifndef DISABLE_POSIX_TRACE
-    tm2 = recorder_wtime();
-
-    if(__recorderfh != NULL)
-        fprintf(__recorderfh," %d %.5f\n", ret, tm2 - tm1);
-    #endif
-
-    return(ret);
-}
-
-static double posix_wtime(void)
-{
-    return RECORDER_MPI_CALL(PMPI_Wtime)();
-}
-
-double recorder_wtime(void)
-{
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    return (time.tv_sec + ((double)time.tv_usec/1000000));
+double recorder_wtime(void) {
+  struct timeval time;
+  gettimeofday(&time, NULL);
+  return (time.tv_sec + ((double)time.tv_usec / 1000000));
 }
