@@ -15,9 +15,9 @@ LD = @LD@
 RECORDER_LOG_FORMAT = $(srcdir)/./recorder-log-format.h
 INCL_DEPS = include/recorder.h include/recorder-dynamic.h $(recorder_LOG_FORMAT)
 
-CFLAGS_SHARED = -fPIC -I. -I$(srcdir) -I$(srcdir)/../\
-				-I${MPI_DIR}/include -I${HDF5_DIR}/include \
-				-D_LARGEFILE64_SOURCE -shared -DRECORDER_PRELOAD
+CFLAGS_SHARED = -fPIC -I. -I$(srcdir)/include -I$(srcdir)/../\
+	-I${MPI_DIR}/include -I${HDF5_DIR}/include\
+	-D_LARGEFILE64_SOURCE -shared -DRECORDER_PRELOAD
 
 LIBS += -lz @LIBBZ2@
 LDFLAGS += -L${HDF5_DIR}/lib -lhdf5
