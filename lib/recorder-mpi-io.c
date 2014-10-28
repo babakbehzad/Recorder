@@ -164,7 +164,7 @@ int MPI_Comm_Barrier(MPI_Comm comm) {
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -175,7 +175,7 @@ int MPI_Comm_Barrier(MPI_Comm comm) {
 
   ret = RECORDER_MPI_CALL(PMPI_Barrier)(comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -190,7 +190,7 @@ int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -206,7 +206,7 @@ int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root,
 
   ret = RECORDER_MPI_CALL(PMPI_Bcast)(buffer, count, datatype, root, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -221,7 +221,7 @@ int MPI_Gather(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -240,7 +240,7 @@ int MPI_Gather(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   ret = RECORDER_MPI_CALL(PMPI_Gather)(sbuf, scount, stype, rbuf, rcount, rtype,
                                        root, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -255,7 +255,7 @@ int MPI_Scatter(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -274,7 +274,7 @@ int MPI_Scatter(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   ret = RECORDER_MPI_CALL(PMPI_Scatter)(sbuf, scount, stype, rbuf, rcount,
                                         rtype, root, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -290,7 +290,7 @@ int MPI_Gatherv(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -309,7 +309,7 @@ int MPI_Gatherv(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   ret = RECORDER_MPI_CALL(PMPI_Gatherv)(sbuf, scount, stype, rbuf, rcount,
                                         displs, rtype, root, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -325,7 +325,7 @@ int MPI_Scatterv(CONST void *sbuf, CONST int *scount, CONST int *displa,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -344,7 +344,7 @@ int MPI_Scatterv(CONST void *sbuf, CONST int *scount, CONST int *displa,
   ret = RECORDER_MPI_CALL(PMPI_Scatterv)(sbuf, scount, displa, stype, rbuf,
                                          rcount, rtype, root, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -360,7 +360,7 @@ int rcount, MPI_Datatype rtype, MPI_Comm comm )  {
     int ret;
     double tm1, tm2;
 
-    #ifndef DISABLE_HDF5_TRACE
+    #ifndef DISABLE_MPIO_TRACE
     depth++;
     tm1 = recorder_wtime();
     char *comm_name = comm2name(comm);
@@ -379,7 +379,7 @@ sbuf, scount, stype_name, rbuf, rcount, rtype_name, comm_name);
     ret = RECORDER_MPI_CALL(PMPI_Allgather)(sbuf, scount, stype, rbuf, rcount,
 rtype, comm);
 
-    #ifndef DISABLE_HDF5_TRACE
+    #ifndef DISABLE_MPIO_TRACE
     tm2 = recorder_wtime();
     if(__recorderfh != NULL && depth == 1)
         fprintf(__recorderfh, " %d %.5f\n", ret, tm2-tm1);
@@ -396,7 +396,7 @@ int MPI_Allgatherv(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -416,7 +416,7 @@ int MPI_Allgatherv(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   ret = RECORDER_MPI_CALL(PMPI_Allgatherv)(sbuf, scount, stype, rbuf, rcount,
                                            displs, rtype, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -431,7 +431,7 @@ int MPI_Alltoall(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -450,7 +450,7 @@ int MPI_Alltoall(CONST void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
   ret = RECORDER_MPI_CALL(PMPI_Alltoall)(sbuf, scount, stype, rbuf, rcount,
                                          rtype, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -465,7 +465,7 @@ int MPI_reduce(CONST void *sbuf, void *rbuf, int count, MPI_Datatype stype,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -482,7 +482,7 @@ int MPI_reduce(CONST void *sbuf, void *rbuf, int count, MPI_Datatype stype,
   ret = RECORDER_MPI_CALL(PMPI_Allreduce)((void *)sbuf, rbuf, count, stype, op,
                                           comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -497,7 +497,7 @@ int MPI_Allreduce(CONST void *sbuf, void *rbuf, int count, MPI_Datatype stype,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -514,7 +514,7 @@ int MPI_Allreduce(CONST void *sbuf, void *rbuf, int count, MPI_Datatype stype,
   ret = RECORDER_MPI_CALL(PMPI_Allreduce)((void *)sbuf, rbuf, count, stype, op,
                                           comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -529,7 +529,7 @@ int MPI_Reduce_scatter(CONST void *sbuf, void *rbuf, CONST int *rcounts,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -546,7 +546,7 @@ int MPI_Reduce_scatter(CONST void *sbuf, void *rbuf, CONST int *rcounts,
   ret = RECORDER_MPI_CALL(PMPI_Reduce_scatter)(sbuf, rbuf, rcounts, stype, op,
                                                comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
@@ -561,7 +561,7 @@ int MPI_Scan(CONST void *sbuf, void *rbuf, int count, MPI_Datatype stype,
   int ret;
   double tm1, tm2;
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   depth++;
   tm1 = recorder_wtime();
   char *comm_name = comm2name(comm);
@@ -578,7 +578,7 @@ int MPI_Scan(CONST void *sbuf, void *rbuf, int count, MPI_Datatype stype,
   ret =
       RECORDER_MPI_CALL(PMPI_Scan)((void *)sbuf, rbuf, count, stype, op, comm);
 
-#ifndef DISABLE_HDF5_TRACE
+#ifndef DISABLE_MPIO_TRACE
   tm2 = recorder_wtime();
   if (__recorderfh != NULL && depth == 1)
     fprintf(__recorderfh, " %d %.5f\n", ret, tm2 - tm1);
