@@ -62,7 +62,7 @@
   if (!(__real_##func)) {                                                      \
     __real_##func = dlsym(RTLD_NEXT, #func);                                   \
     if (!(__real_##func)) {                                                    \
-      fprintf(stderr, "Darshan failed to map symbol: %s\n", #func);            \
+      fprintf(stderr, "Recorder failed to map symbol: %s\n", #func);            \
       exit(1);                                                                 \
     }                                                                          \
   }

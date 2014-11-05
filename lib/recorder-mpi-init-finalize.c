@@ -59,7 +59,7 @@
 #define MAP_OR_FAIL(func)                                                      \
   __real_##func = dlsym(RTLD_NEXT, #func);                                     \
   if (!(__real_##func)) {                                                      \
-    fprintf(stderr, "Darshan failed to map symbol: %s\n", #func);              \
+    fprintf(stderr, "Recorder failed to map symbol: %s\n", #func);              \
   }
 
 RECORDER_FORWARD_DECL(PMPI_File_close, int, (MPI_File * fh));
@@ -298,6 +298,23 @@ void resolve_mpi_symbols(void) {
 
 #endif
 
+int PMPI_Init(int *argc, char ***argv) {
+  int ret;
+
+#ifdef RECORDER_PRELOAD
+  resolve_mpi_symbols();
+#endif
+
+  ret = RECORDER_MPI_CALL(PMPI_Init)(argc, argv);
+  if (ret != MPI_SUCCESS) {
+    return (ret);
+  }
+
+  recorder_mpi_initialize(argc, argv);
+
+  return (ret);
+}
+
 int MPI_Init(int *argc, char ***argv) {
   int ret;
 
@@ -317,6 +334,10 @@ int MPI_Init(int *argc, char ***argv) {
 
 int MPI_Init_thread(int *argc, char ***argv, int required, int *provided) {
   int ret;
+
+#ifdef RECORDER_PRELOAD
+  resolve_mpi_symbols();
+#endif
 
   ret = RECORDER_MPI_CALL(PMPI_Init_thread)(argc, argv, required, provided);
   if (ret != MPI_SUCCESS) {
